@@ -1,0 +1,39 @@
+stages:
+  - build
+  - test
+  - package
+  - deploy
+
+variables:
+  MAVEN_CLI_OPTS: "-B -e -V"
+
+cache:
+  paths:
+    - .m2/repository
+
+build:
+  stage: build
+  image: maven:3.9.2-eclipse-temurin-17
+  script:
+    - mvn $MAVEN_CLI_OPTS clean compile
+
+test:
+  stage: test
+  image: maven:3.9.2-eclipse-temurin-17
+  script:
+    - mvn $MAVEN_CLI_OPTS test
+
+package:
+  stage: package
+  image: maven:3.9.2-eclipse-temurin-17
+  script:
+    - mvn $MAVEN_CLI_OPTS package
+
+deploy:
+  stage: deploy
+  image: eclipse-temurin:17-jdk
+  script:
+    - scp target/*.jar user@your-server:/path/to/deploy
+    - ssh user@your-server "cd /path/to/deploy && java -jar blog-app-api.jar &"
+  only:
+    - main
